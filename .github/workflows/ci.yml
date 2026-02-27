@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  backend-tests:
+    name: Backend tests (Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t ski-backend .
+
+      - name: Run tests
+        run: docker run --rm ski-backend python -m pytest tests/ -v
+
+  frontend-build:
+    name: Frontend build (Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build frontend image
+        run: docker build -t ski-frontend -f frontend/Dockerfile frontend/
+
+      - name: Verify frontend build
+        run: docker run --rm --entrypoint="" ski-frontend npm run build

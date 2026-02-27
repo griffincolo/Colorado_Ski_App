@@ -1,0 +1,77 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    ports:
+      - "4317:4317"
+      - "16686:16686"
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - db_data:/app/data
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_SERVICE_NAME: weather-collector
+    command: uvicorn data_collector.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - jaeger
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  analyzer:
+    build: .
+    ports:
+      - "8001:8001"
+    volumes:
+      - db_data:/app/data
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_SERVICE_NAME: ski-analyzer
+    command: uvicorn data_analyzer.main:app --host 0.0.0.0 --port 8001
+    depends_on:
+      - jaeger
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  scheduler:
+    build: .
+    command: python scheduler.py
+    depends_on:
+      api:
+        condition: service_healthy
+      analyzer:
+        condition: service_healthy
+    
+  integration-test:
+    build: .
+    volumes:
+      - .:/app
+    command: python -m pytest tests/test_integration_analyzer.py -v
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      API_TARGET: http://analyzer:8001
+    depends_on:
+      - analyzer
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
+
+volumes:
+  db_data:
