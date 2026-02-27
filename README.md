@@ -17,9 +17,9 @@ Pulls weather and snow data from [weather.gov](https://www.weather.gov) for Colo
 | **Product environment** | Docker Compose stack with `api`, `analyzer`, `scheduler`, `frontend`, `jaeger`, plus healthchecks and service deps. `docker-compose.yml` |
 | **Integration tests** | `test_integration_analyzer.py` uses seeded SQLite fixture to exercise the analyzer. `tests/test_integration_analyzer.py`, `tests/conftest.py` |
 | **Mock objects / test doubles** | NWS API mocked via `@patch("data_collector.main.httpx.Client")` in `test_api_collector.py` so tests don't hit real HTTP. `tests/test_api_collector.py` |
-| **Continuous integration** | GitHub Actions runs backend tests (`pytest`) and frontend build on push/PR to `main`. `.github/workflows/ci.yml` |
 | **Production monitoring** | OpenTelemetry instrumentation for FastAPI, HTTPX, SQLAlchemy; traces exported to Jaeger. `data_collector/observability.py`, `docker-compose.yml` (jaeger) |
 | **Event collaboration / messaging** | Scheduler triggers `POST /fetch` then `POST /internal/notify`. Analyzer exposes `GET /events` (SSE). Frontend subscribes to `/events` and refetches scores on `weather_data_updated`. `scheduler.py`, `data_analyzer/main.py`, `frontend/src/App.tsx` |
+| **CI/CD** | **CI:** GitHub Actions runs backend tests and frontend build on push/PR to `main`. `ci.yml` **CD:** Render auto-deploys backend on push to `main`. `cd.yml` documents the process. Live: https://colorado-ski-app.onrender.com |
 
 ---
 
