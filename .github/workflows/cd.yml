@@ -1,0 +1,11 @@
+name: CD
+# CD runs on push to main. Actual deployment is handled by Render's auto-deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  cd:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "CD - Render auto-deploys on push to main"
