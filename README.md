@@ -19,7 +19,7 @@ Pulls weather and snow data from [weather.gov](https://www.weather.gov) for Colo
 | **Mock objects / test doubles** | NWS API mocked via `@patch("data_collector.main.httpx.Client")` in `test_api_collector.py` so tests don't hit real HTTP. `tests/test_api_collector.py` |
 | **Production monitoring** | OpenTelemetry instrumentation for FastAPI, HTTPX, SQLAlchemy; traces exported to Jaeger. `data_collector/observability.py`, `docker-compose.yml` (jaeger) |
 | **Event collaboration / messaging** | Scheduler triggers `POST /fetch` then `POST /internal/notify`. Analyzer exposes `GET /events` (SSE). Frontend subscribes to `/events` and refetches scores on `weather_data_updated`. `scheduler.py`, `data_analyzer/main.py`, `frontend/src/App.tsx` |
-| **CI/CD** | **CI:** GitHub Actions runs backend tests and frontend build on push/PR to `main`. `ci.yml` **CD:** Render auto-deploys backend on push to `main`. `cd.yml` documents the process. Live: https://colorado-ski-app.onrender.com |
+| **CI/CD** | **CI:** GitHub Actions runs backend tests and frontend build on push/PR to `main`. `ci.yml` **CD:** Render auto-deploys backend on push to `main`. `cd.yml` documents the process. Live: https://colorado-ski-app.onrender.com/docs |
 
 ---
 
